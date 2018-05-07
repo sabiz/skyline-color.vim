@@ -14,7 +14,7 @@ let g:loaded_skyline_color = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-call SkylineColor#load()
+call SkylineColor#setup()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
