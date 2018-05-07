@@ -13,8 +13,12 @@ let g:loaded_skyline_color = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Utitlity Section                                                             "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Math ------------------------------------
 let s:PI = 3.14159265359
-let s:SunsetTimeCache = {}
 
 function! s:r2d(r)
     return a:r * 180.0 / s:PI
@@ -24,6 +28,7 @@ function! s:d2r(d)
     return a:d * s:PI / 180.0
 endfunction
 
+" Sun -------------------------------------
 function! s:getSunAngle(dayOfYear) abort
     return -23.44 * cos(s:d2r(360.0 / 365.0 * (a:dayOfYear + 10)))
 endfunction
@@ -36,23 +41,7 @@ function! s:getSunsetTime(dayOfYear, lat) abort
     return 24.0 * (s:getSunsetAngle(a:dayOfYear, a:lat) / 360.0)
 endfunction
 
-function! s:getColorStopsFromTime(timeFrom, timeTo) abort
-    return [
-        \ [a:timeFrom - 2.0, '#111111'],
-        \ [a:timeFrom - 1.5, '#4d548a'],
-        \ [a:timeFrom - 1.0, '#c486b1'],
-        \ [a:timeFrom - 0.5, '#ee88a0'],
-        \ [a:timeFrom, '#ff7d75'],
-        \ [a:timeFrom + 0.5, '#f4eeef'],
-        \ [(a:timeTo + a:timeFrom) / 2, '#5dc9f1'],
-        \ [a:timeTo - 1.5, '#9eefe0'],
-        \ [a:timeTo - 1.0, '#f1e17c'],
-        \ [a:timeTo - 0.5, '#f86b10'],
-        \ [a:timeTo, '#100028'],
-        \ [a:timeTo + 0.5, '#111111'],
-    \ ]
-endfunction
-
+" Color ------------------------------------
 function! s:hexColor2DecColor(rgb) abort
     let dRgb = str2nr(strpart(a:rgb, 1), 16)
     return [
@@ -75,33 +64,6 @@ function! s:getGradient(a, b, x) abort
     let gB = float2nr(ceil((bB - aB) * a:x + aB))
 
     return s:decColor2HexColor(gR, gG, gB)
-endfunction
-
-function! s:getColorFromTime(colorStops, time) abort
-    if a:time <= a:colorStops[0][0]
-        return a:colorStops[0][1]
-    endif
-
-    if a:time >= a:colorStops[len(a:colorStops) -1][0]
-        return a:colorStops[len(a:colorStops) -1][1]
-    endif
-
-    let i = 0
-    let pickedIndex = 0
-    while i < len(a:colorStops)
-        if a:time >= a:colorStops[i][0]
-            let pickedIndex = i
-        endif
-        let i +=1
-    endwhile
-    let x = (a:time - a:colorStops[pickedIndex][0]) / (a:colorStops[pickedIndex +1][0] - a:colorStops[pickedIndex][0])
-    return s:getGradient(a:colorStops[pickedIndex][1], a:colorStops[pickedIndex +1][1], x)
-endfunction
-
-function! s:getTimeFloatFromHMS(time) abort
-    let [h, m, s] = split(a:time, ':')
-    return ((s / 60.0) +
-            \ m) / 60.0 + h " Not work syntax highlight...
 endfunction
 
 function! s:rgb2Ansi(rgb) abort
@@ -195,6 +157,57 @@ function! s:getComplementaryColor(rgb) abort
     return s:hsv2Rgb(h, s, v)
 endfunction
 
+" Time ------------------------------------
+
+function! s:getTimeFloatFromHMS(time) abort
+    let [h, m, s] = split(a:time, ':')
+    return ((s / 60.0) +
+            \ m) / 60.0 + h " Not work syntax highlight...
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Main Section                                                                 "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+function! s:getColorStopsFromTime(timeFrom, timeTo) abort
+    return [
+        \ [a:timeFrom - 2.0, '#111111'],
+        \ [a:timeFrom - 1.5, '#4d548a'],
+        \ [a:timeFrom - 1.0, '#c486b1'],
+        \ [a:timeFrom - 0.5, '#ee88a0'],
+        \ [a:timeFrom, '#ff7d75'],
+        \ [a:timeFrom + 0.5, '#f4eeef'],
+        \ [(a:timeTo + a:timeFrom) / 2, '#5dc9f1'],
+        \ [a:timeTo - 1.5, '#9eefe0'],
+        \ [a:timeTo - 1.0, '#f1e17c'],
+        \ [a:timeTo - 0.5, '#f86b10'],
+        \ [a:timeTo, '#100028'],
+        \ [a:timeTo + 0.5, '#111111'],
+    \ ]
+endfunction
+
+function! s:getColorFromTime(colorStops, time) abort
+    if a:time <= a:colorStops[0][0]
+        return a:colorStops[0][1]
+    endif
+
+    if a:time >= a:colorStops[len(a:colorStops) -1][0]
+        return a:colorStops[len(a:colorStops) -1][1]
+    endif
+
+    let i = 0
+    let pickedIndex = 0
+    while i < len(a:colorStops)
+        if a:time >= a:colorStops[i][0]
+            let pickedIndex = i
+        endif
+        let i +=1
+    endwhile
+    let x = (a:time - a:colorStops[pickedIndex][0]) / (a:colorStops[pickedIndex +1][0] - a:colorStops[pickedIndex][0])
+    return s:getGradient(a:colorStops[pickedIndex][1], a:colorStops[pickedIndex +1][1], x)
+endfunction
+
+let s:SunsetTimeCache = {}
 function! SkylineColor#display() abort
     let dayOfYear = strftime('%j')
     if empty(s:SunsetTimeCache) || s:SunsetTimeCache['dayOfYear'] != dayOfYear
@@ -219,15 +232,17 @@ function! SkylineColor#display() abort
 endfunction
 
 
-function! SkylineColor#load()
-" let g:SkylineColor_TimeFormat="%j"
-" Setup configurations ----------
+function! SkylineColor#setup()
+" Setup configurations
 let g:SkylineColor_TimeFormat = get(g:, 'SkylineColor_TimeFormat', '%H:%M')
 let g:SkylineColor_Latitude = get(g:, 'SkylineColor_Latitude', 35.4052) " Tokyo station of japan
-
 endfunction
 
-function! SkylineColor#preview()
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Develop tools Section                                                        "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! SkylineColor#colorTest()
     let midnight = 60 * 60 * 15 " from a.m. 9:00
     let i = midnight
     let line = ''
@@ -251,8 +266,6 @@ function! SkylineColor#preview()
         let i += 60
     endwhile
 endfunction
-
-
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
