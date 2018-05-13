@@ -171,18 +171,17 @@ endfunction
 
 function! s:getColorStopsFromTime(timeFrom, timeTo) abort
     return [
-        \ [a:timeFrom - 2.0, '#111111'],
-        \ [a:timeFrom - 1.5, '#4d548a'],
-        \ [a:timeFrom - 1.0, '#c486b1'],
-        \ [a:timeFrom - 0.5, '#ee88a0'],
-        \ [a:timeFrom, '#ff7d75'],
-        \ [a:timeFrom + 0.5, '#f4eeef'],
+        \ [a:timeFrom - 2.0, '#1b1323'],
+        \ [a:timeFrom - 1.5, '#f1625c'],
+        \ [a:timeFrom - 0.75, '#ff9e54'],
+        \ [a:timeFrom - 0.15, '#ffcd77'],
+        \ [a:timeFrom, '#fed176'],
         \ [(a:timeTo + a:timeFrom) / 2, '#5dc9f1'],
-        \ [a:timeTo - 1.5, '#9eefe0'],
-        \ [a:timeTo - 1.0, '#f1e17c'],
-        \ [a:timeTo - 0.5, '#f86b10'],
-        \ [a:timeTo, '#100028'],
-        \ [a:timeTo + 0.5, '#111111'],
+        \ [a:timeTo - 2.50 , '#b2f7ff'],
+        \ [a:timeTo - 0.70 , '#f4db5d'],
+        \ [a:timeTo - 0.50 , '#ff6f1c'],
+        \ [a:timeTo, '#5e4477'],
+        \ [a:timeTo + 1.5, '#1b1323'],
     \ ]
 endfunction
 
@@ -223,12 +222,13 @@ function! SkylineColor#display() abort
         \   'colorStops': colorStops
         \ }
     endif
+
     let BgRgb = s:getColorFromTime(s:SunsetTimeCache['colorStops'], s:getTimeFloatFromHMS(strftime('%H:%M:%S')))
     let BgAnsi = s:rgb2Ansi(BgRgb)
     let FgRgb = s:getComplementaryColor(BgRgb)
     let FgAnsi = s:rgb2Ansi(FgRgb)
     exec printf('hi SkylineColor ctermfg=%s ctermbg=%s guifg=%s guibg=%s', FgAnsi, BgAnsi, FgRgb, BgRgb)
-    return strftime(g:SkylineColor_TimeFormat)
+    return " ".strftime(g:SkylineColor_TimeFormat)." "
 endfunction
 
 
