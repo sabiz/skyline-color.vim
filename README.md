@@ -7,12 +7,12 @@ Thanks [zk-phi](https://github.com/zk-phi) & [mopp](https://github.com/mopp) :+1
 
 ## Feature
 
-- [ ] display clock  
-- [ ] clock with sky color in statusline or tabline  
+- [x] display clock  
+- [x] clock with sky color in statusline or tabline  
 and...?
 
 ## TODO
 
-- [ ] implementation features  
-- [ ] refactoring  
+- [ ] insert unicode characters at special time  
+- [ ] vertical hilight  
 
